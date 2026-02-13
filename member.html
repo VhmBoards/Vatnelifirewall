@@ -1,45 +1,867 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Dashboard</title>
+    <title>Medlemspanel - Vatneli Firewall</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #00ff88;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(10, 14, 39, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #00aa55;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar-display {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            overflow: hidden;
+            background: rgba(0, 255, 136, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .avatar-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-display.empty {
+            color: #00aa55;
+            font-size: 24px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .user-points {
+            font-size: 12px;
+            color: #00ffff;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 5px;
+            color: #ff0055;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff0055;
+            color: #0a0e27;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            gap: 10px;
+        }
+
+        .messages-box {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 2px solid #00ff88;
+            border-radius: 3px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #00ff88;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(0, 255, 136, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+        }
+
+        .message-name {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .message-time {
+            color: #00aa55;
+        }
+
+        .message-text {
+            color: #00ff88;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        .message.hidden {
+            opacity: 0.3;
+            color: #00aa55;
+        }
+
+        .message.hidden .message-text::before {
+            content: "[HIDDEN - Suspicious time]";
+        }
+
+        .message.hidden .message-text {
+            display: none;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            max-height: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            border-color: #00ffff;
+        }
+
+        .send-btn {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #00ff88, #00ffff);
+            border: none;
+            border-radius: 5px;
+            color: #0a0e27;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .emoji-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .emoji-btn {
+            padding: 8px 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+            color: #00ff88;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .emoji-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .leaderboard-container {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            gap: 10px;
+        }
+
+        .leaderboard-box {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.05);
+            border-radius: 3px;
+            margin-bottom: 10px;
+            border-left: 2px solid #00ff88;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #00ffff;
+            min-width: 30px;
+            font-size: 14px;
+        }
+
+        .rank.top3 {
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .leaderboard-avatar {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #00ff88;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(0, 255, 136, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .leaderboard-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .leaderboard-points {
+            color: #00ff88;
+            font-size: 11px;
+        }
+
+        .signup-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #00aa55;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #00aa55, #00ff88);
+            border: none;
+            border-radius: 5px;
+            color: #0a0e27;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .signup-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .signup-form {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+        }
+
+        .signup-form.active {
+            display: flex;
+        }
+
+        .signup-form input {
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .signup-form input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .signup-form button {
+            padding: 8px;
+            background: #00ff88;
+            border: none;
+            border-radius: 3px;
+            color: #0a0e27;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .signup-form button:hover {
+            background: #00ffff;
+        }
+
+        .avatar-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+        }
+
+        .avatar-section h3 {
+            font-size: 12px;
+            color: #00ffff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .camera-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .camera-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        #videoPreview {
+            width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+            background: #000;
+        }
+
+        .camera-controls {
+            display: none;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .camera-controls.active {
+            display: flex;
+        }
+
+        .camera-controls button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .camera-controls .capture-btn {
+            background: linear-gradient(135deg, #00ff88, #00ffff);
+            color: #0a0e27;
+        }
+
+        .camera-controls .close-btn {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            color: #ff0055;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container,
+            .leaderboard-container {
+                height: 300px;
+            }
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+
+        .messages-box,
+        .leaderboard-box {
+            scrollbar-color: #00ff88 rgba(0, 255, 136, 0.05);
+            scrollbar-width: thin;
+        }
+    </style>
 </head>
 <body>
-    <h1>Member Dashboard</h1>
-    
-    <section id="chat">
-        <h2>Chat Room</h2>
-        <div id="chat-window"></div>
-        <input type="text" id="chat-input" placeholder="Type your message...">
-        <button id="send-message">Send</button>
-    </section>
+    <div class="container">
+        <!-- Chat Panel -->
+        <div class="panel">
+            <div class="header">
+                <h2>💬 Live Chat</h2>
+                <button class="logout-btn" onclick="logout()">Logg ut</button>
+            </div>
 
-    <section id="avatar-upload">
-        <h2>Upload Your Avatar</h2>
-        <input type="file" id="avatar-input" accept="image/*">
-        <button id="upload-avatar">Upload Avatar</button>
-        <img id="avatar-preview" src="#" alt="Avatar Preview" style="display:none;width:100px;height:100px;">
-    </section>
+            <div class="chat-container">
+                <div class="emoji-buttons" id="emojiButtons"></div>
 
-    <section id="leaderboard">
-        <h2>Leaderboard</h2>
-        <ol id="leaderboard-list">
-            <!-- Leaderboard entries will be dynamically populated here -->
-        </ol>
-    </section>
-    
-    <section id="student-signup">
-        <h2>Student Signup</h2>
-        <form id="signup-form">
-            <label for="student-name">Name:</label>
-            <input type="text" id="student-name" required>
-            <button type="submit">Sign Up</button>
-        </form>
-    </section>
+                <div class="messages-box scrollbar" id="messagesBox"></div>
 
-    <script>
-        // JavaScript to handle chat, avatar upload, leaderboard and signup goes here.
+                <div class="input-area">
+                    <textarea class="message-input" id="messageInput" placeholder="Skriv en melding..." rows="2"></textarea>
+                    <button class="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <!-- Avatar Section -->
+            <div class="avatar-section">
+                <h3>📸 Avatar</h3>
+                <button class="camera-btn" onclick="openCamera()">Åpne Kamera</button>
+                <video id="videoPreview"></video>
+                <div class="camera-controls" id="cameraControls">
+                    <button class="capture-btn" onclick="captureAvatar()">Lagre Avatar</button>
+                    <button class="close-btn" onclick="closeCamera()">Lukk</button>
+                </div>
+            </div>
+
+            <!-- Signup Section -->
+            <div class="signup-section">
+                <button class="signup-btn" onclick="toggleSignupForm()">📝 Elevsignup</button>
+                <form class="signup-form" id="signupForm" onsubmit="submitSignup(event)">
+                    <input type="text" id="signupName" placeholder="Fullt navn" required>
+                    <input type="tel" id="signupPhone" placeholder="Telefon" required>
+                    <input type="text" id="signupCode" placeholder="Kode" required>
+                    <input type="number" id="signupBirthYear" placeholder="Fødselsår" required>
+                    <button type="submit">Send Søknad</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Leaderboard Panel -->
+        <div class="panel">
+            <h2>🏆 Leaderboard</h2>
+            <div class="leaderboard-container">
+                <div class="leaderboard-box scrollbar" id="leaderboardBox"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, signOut, ref, set, get, push, onValue, query, orderByChild, limitToLast, update } from './firebase.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+
+        let currentUser = null;
+        let videoStream = null;
+        let canvas = null;
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            if (!user || !sessionStorage.getItem('userRole')) {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                initializeMember();
+            }
+        });
+
+        function initializeMember() {
+            const userName = sessionStorage.getItem('userName');
+            document.querySelector('.user-name').textContent = `@ ${userName}`;
+            setupEmojiButtons();
+            loadMessages();
+            loadLeaderboard();
+            loadUserAvatar();
+            loadUserPoints();
+
+            // Real-time message updates
+            const messagesRef = ref(db, 'messages');
+            onValue(messagesRef, () => {
+                loadMessages();
+                loadLeaderboard();
+            });
+
+            // Real-time points updates
+            const pointsRef = ref(db, 'points');
+            onValue(pointsRef, () => {
+                loadUserPoints();
+                loadLeaderboard();
+            });
+        }
+
+        function setupEmojiButtons() {
+            const emojis = ['👍', '❤️', '😂', '🔥', '🚀', '💯', '🎉', '⚡'];
+            const container = document.getElementById('emojiButtons');
+            emojis.forEach(emoji => {
+                const btn = document.createElement('button');
+                btn.className = 'emoji-btn';
+                btn.textContent = emoji;
+                btn.onclick = () => {
+                    document.getElementById('messageInput').value += emoji;
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text || !currentUser) return;
+
+            const userName = sessionStorage.getItem('userName');
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const time = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+            // Check if in suspicious time (09:00-14:30)
+            const isSuspiciousTime = (hours >= 9 && hours < 14) || (hours === 14 && minutes < 30);
+
+            const messageData = {
+                uid: currentUser.uid,
+                name: userName,
+                text: text,
+                timestamp: now.getTime(),
+                time: time,
+                avatar: sessionStorage.getItem('userAvatar') || '',
+                suspicious: isSuspiciousTime
+            };
+
+            // Add to messages
+            const messagesRef = ref(db, 'messages');
+            push(messagesRef, messageData);
+
+            // Increment points
+            const pointsRef = ref(db, `points/${currentUser.uid}`);
+            get(pointsRef).then(snap => {
+                const currentPoints = snap.val() || 0;
+                set(pointsRef, currentPoints + 1);
+            });
+
+            input.value = '';
+        }
+
+        function loadMessages() {
+            const messagesRef = query(ref(db, 'messages'), orderByChild('timestamp'), limitToLast(50));
+            get(messagesRef).then(snap => {
+                const messagesBox = document.getElementById('messagesBox');
+                messagesBox.innerHTML = '';
+
+                if (snap.exists()) {
+                    const messages = [];
+                    snap.forEach(childSnap => {
+                        messages.unshift(childSnap.val());
+                    });
+
+                    messages.reverse().forEach(msg => {
+                        const messageEl = document.createElement('div');
+                        messageEl.className = 'message';
+
+                        const now = new Date();
+                        const hours = now.getHours();
+                        const minutes = now.getMinutes();
+                        const isSuspiciousNow = (hours >= 9 && hours < 14) || (hours === 14 && minutes < 30);
+
+                        if (msg.suspicious && isSuspiciousNow) {
+                            messageEl.classList.add('hidden');
+                        }
+
+                        messageEl.innerHTML = `
+                            <div class="message-avatar">
+                                ${msg.avatar ? `<img src="${msg.avatar}" alt="Avatar">` : '<span>👤</span>'}
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-name">${msg.name}</span>
+                                    <span class="message-time">${msg.time}</span>
+                                </div>
+                                <div class="message-text">${msg.text}</div>
+                            </div>
+                        `;
+                        messagesBox.appendChild(messageEl);
+                    });
+                }
+            });
+        }
+
+        function loadLeaderboard() {
+            const pointsRef = query(ref(db, 'points'), orderByChild('points'));
+            get(pointsRef).then(snap => {
+                const leaderboardBox = document.getElementById('leaderboardBox');
+                leaderboardBox.innerHTML = '';
+
+                if (snap.exists()) {
+                    const entries = [];
+                    snap.forEach(childSnap => {
+                        entries.push({ uid: childSnap.key, points: childSnap.val() });
+                    });
+
+                    entries.reverse().forEach((entry, index) => {
+                        const usersRef = ref(db, `users/${entry.uid}`);
+                        get(usersRef).then(userSnap => {
+                            if (userSnap.exists()) {
+                                const user = userSnap.val();
+                                const entryEl = document.createElement('div');
+                                entryEl.className = 'leaderboard-entry';
+                                entryEl.innerHTML = `
+                                    <div class="rank ${index < 3 ? 'top3' : ''}">#${index + 1}</div>
+                                    <div class="leaderboard-avatar">
+                                        ${user.avatar ? `<img src="${user.avatar}" alt="Avatar">` : '<span>👤</span>'}
+                                    </div>
+                                    <div class="leaderboard-info">
+                                        <div class="leaderboard-name">${user.name}</div>
+                                        <div class="leaderboard-points">${entry.points} poeng</div>
+                                    </div>
+                                `;
+                                leaderboardBox.appendChild(entryEl);
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        function loadUserAvatar() {
+            const avatarRef = ref(db, `avatars/${currentUser.uid}`);
+            get(avatarRef).then(snap => {
+                if (snap.exists()) {
+                    const avatarUrl = snap.val();
+                    sessionStorage.setItem('userAvatar', avatarUrl);
+                    const avatarDisplay = document.querySelector('.avatar-display');
+                    avatarDisplay.innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
+                }
+            });
+        }
+
+        function loadUserPoints() {
+            const pointsRef = ref(db, `points/${currentUser.uid}`);
+            get(pointsRef).then(snap => {
+                const points = snap.val() || 0;
+                document.querySelector('.user-points').textContent = \
+                `${points} poeng`;
+            });
+        }
+
+        window.openCamera = function() {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                videoStream = stream;
+                const video = document.getElementById('videoPreview');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('cameraControls').classList.add('active');
+            }).catch(err => {
+                alert('Kunne ikke åpne kamera: ' + err.message);
+            });
+        };
+
+        window.captureAvatar = function() {
+            const video = document.getElementById('videoPreview');
+            canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            const avatarUrl = canvas.toDataURL('image/png');
+            const avatarRef = ref(db, `avatars/${currentUser.uid}`);
+            set(avatarRef, avatarUrl);
+
+            sessionStorage.setItem('userAvatar', avatarUrl);
+            loadUserAvatar();
+            closeCamera();
+
+            alert('✓ Avatar lagret!');
+        };
+
+        window.closeCamera = function() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            document.getElementById('videoPreview').style.display = 'none';
+            document.getElementById('cameraControls').classList.remove('active');
+        };
+
+        window.toggleSignupForm = function() {
+            document.getElementById('signupForm').classList.toggle('active');
+        };
+
+        window.submitSignup = function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('signupName').value;
+            const phone = document.getElementById('signupPhone').value;
+            const code = document.getElementById('signupCode').value;
+            const birthYear = parseInt(document.getElementById('signupBirthYear').value);
+
+            if (birthYear >= 2010) {
+                alert('❌ Du må være yngre enn 2010');
+                return;
+            }
+
+            const signupRef = ref(db, 'pendingSignups');
+            push(signupRef, {
+                name,
+                phone,
+                code,
+                birthYear,
+                timestamp: new Date().getTime()
+            });
+
+            alert('✓ Søknaden er sendt til admin!');
+            document.getElementById('signupForm').classList.remove('active');
+            document.getElementById('signupForm').reset();
+        };
+
+        window.logout = function() {
+            sessionStorage.clear();
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            });
+        };
     </script>
 </body>
 </html>
