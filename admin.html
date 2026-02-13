@@ -12,36 +12,56 @@
     </header>
     <nav>
         <ul>
-            <li><a href="#approvals">Approve Student Signups</a></li>
-            <li><a href="#chat-moderation">Chat Moderation</a></li>
-            <li><a href="#surveys">View Surveys</a></li>
-            <li><a href="#leaderboard">Leaderboard</a></li>
+            <li><a href="#student-signups">Manage Student Signups</a></li>
+            <li><a href="#survey-responses">View Survey Responses</a></li>
+            <li><a href="#moderate-chat">Moderate Chat Messages</a></li>
         </ul>
     </nav>
     <main>
-        <section id="approvals">
-            <h2>Approve Student Signups</h2>
-            <p>List of student signups for approval:</p>
-            <!-- Student signups will be listed here -->
+        <section id="student-signups">
+            <h2>Manage Student Signups</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Student signups data will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <button id="refresh-signups">Refresh Signups</button>
         </section>
-        <section id="chat-moderation">
-            <h2>Chat Moderation</h2>
-            <p>Options for moderating chat:</p>
-            <!-- Chat moderation tools will be here -->
+        <section id="survey-responses">
+            <h2>View Survey Responses</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Response ID</th>
+                        <th>Question</th>
+                        <th>Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Survey responses data will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <button id="refresh-surveys">Refresh Responses</button>
         </section>
-        <section id="surveys">
-            <h2>View Surveys</h2>
-            <p>Available surveys can be viewed here.</p>
-            <!-- Survey viewing options will be listed here -->
-        </section>
-        <section id="leaderboard">
-            <h2>Leaderboard</h2>
-            <p>Current leaderboard:</p>
-            <!-- Leaderboard will be displayed here -->
+        <section id="moderate-chat">
+            <h2>Moderate Chat Messages</h2>
+            <div id="chat-messages">
+                <!-- Chat messages will be dynamically inserted here -->
+            </div>
+            <button id="refresh-chat">Refresh Chat</button>
         </section>
     </main>
     <footer>
         <p>&copy; 2026 VhmBoards. All rights reserved.</p>
     </footer>
+    <script src="admin.js"></script>
 </body>
 </html>
