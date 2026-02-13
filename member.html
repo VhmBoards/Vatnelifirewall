@@ -2,61 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Member Dashboard</title>
 </head>
 <body>
-    <header>
-        <h1>Student Dashboard</h1>
-    </header>
-    <main>
-        <section id="chat">
-            <h2>Chat</h2>
-            <div id="chat-box"></div>
-            <input type="text" id="chat-input" placeholder="Type a message...">
-            <button id="send-btn">Send</button>
-        </section>
-        <section id="leaderboard">
-            <h2>Leaderboard</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Name</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Student A</td>
-                        <td>100</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Student B</td>
-                        <td>90</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Student C</td>
-                        <td>80</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-        <section id="signup">
-            <h2>Signup</h2>
-            <form id="signup-form">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Signup</button>
-            </form>
-        </section>
-    </main>
-    <script src="script.js"></script>
+    <h1>Member Dashboard</h1>
+    
+    <section id="chat">
+        <h2>Chat Room</h2>
+        <div id="chat-window"></div>
+        <input type="text" id="chat-input" placeholder="Type your message...">
+        <button id="send-message">Send</button>
+    </section>
+
+    <section id="avatar-upload">
+        <h2>Upload Your Avatar</h2>
+        <input type="file" id="avatar-input" accept="image/*">
+        <button id="upload-avatar">Upload Avatar</button>
+        <img id="avatar-preview" src="#" alt="Avatar Preview" style="display:none;width:100px;height:100px;">
+    </section>
+
+    <section id="leaderboard">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard-list">
+            <!-- Leaderboard entries will be dynamically populated here -->
+        </ol>
+    </section>
+    
+    <section id="student-signup">
+        <h2>Student Signup</h2>
+        <form id="signup-form">
+            <label for="student-name">Name:</label>
+            <input type="text" id="student-name" required>
+            <button type="submit">Sign Up</button>
+        </form>
+    </section>
+
+    <script>
+        // JavaScript to handle chat, avatar upload, leaderboard and signup goes here.
+    </script>
 </body>
 </html>
