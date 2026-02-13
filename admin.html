@@ -1,67 +1,710 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Adminpanel - Vatneli Firewall</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #00ff88;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(10, 14, 39, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 16px;
+            text-shadow: 0 0 10px #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 5px;
+            color: #ff0055;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff0055;
+            color: #0a0e27;
+        }
+
+        .content-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .entry {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 2px solid #00ff88;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-info {
+            flex: 1;
+        }
+
+        .entry-name {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .entry-detail {
+            color: #00aa55;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-approve {
+            padding: 6px 12px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            color: #00ff88;
+            cursor: pointer;
+            font-size: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-approve:hover {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .btn-decline {
+            padding: 6px 12px;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 3px;
+            color: #ff0055;
+            cursor: pointer;
+            font-size: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-decline:hover {
+            background: #ff0055;
+            color: #fff;
+        }
+
+        .btn-delete {
+            padding: 6px 12px;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 3px;
+            color: #ff0055;
+            cursor: pointer;
+            font-size: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background: #ff0055;
+            color: #fff;
+        }
+
+        .btn-moderate {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #00aa55, #00ff88);
+            border: none;
+            border-radius: 5px;
+            color: #0a0e27;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-moderate:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00aa55;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #ff0055;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .message-item {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00aa55;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #00ff88;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(0, 255, 136, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-details {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .message-name {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .message-time {
+            color: #00aa55;
+            font-size: 11px;
+        }
+
+        .message-text {
+            color: #00ff88;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        .delete-msg-btn {
+            padding: 8px 12px;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 3px;
+            color: #ff0055;
+            cursor: pointer;
+            font-size: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .delete-msg-btn:hover {
+            background: #ff0055;
+            color: #fff;
+        }
+
+        .survey-item {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 2px solid #00ff88;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+
+        .survey-name {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .survey-answer {
+            color: #00ff88;
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 3px;
+        }
+
+        .empty-state {
+            color: #00aa55;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #00ff88;
+            border-radius: 50%;
+            overflow: hidden;
+            background: rgba(0, 255, 136, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .entry-actions {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .btn-approve,
+            .btn-decline,
+            .btn-delete {
+                flex: 1;
+            }
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+
+        .content-box,
+        .modal-content {
+            scrollbar-color: #00ff88 rgba(0, 255, 136, 0.05);
+            scrollbar-width: thin;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Admin Panel</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="#student-signups">Manage Student Signups</a></li>
-            <li><a href="#survey-responses">View Survey Responses</a></li>
-            <li><a href="#moderate-chat">Moderate Chat Messages</a></li>
-        </ul>
-    </nav>
-    <main>
-        <section id="student-signups">
-            <h2>Manage Student Signups</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Student signups data will be dynamically inserted here -->
-                </tbody>
-            </table>
-            <button id="refresh-signups">Refresh Signups</button>
-        </section>
-        <section id="survey-responses">
-            <h2>View Survey Responses</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Response ID</th>
-                        <th>Question</th>
-                        <th>Response</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Survey responses data will be dynamically inserted here -->
-                </tbody>
-            </table>
-            <button id="refresh-surveys">Refresh Responses</button>
-        </section>
-        <section id="moderate-chat">
-            <h2>Moderate Chat Messages</h2>
-            <div id="chat-messages">
-                <!-- Chat messages will be dynamically inserted here -->
+    <div class="container">
+        <!-- Pending Signups -->
+        <div class="panel">
+            <h2>
+                📝 Elevsignup
+                <button class="logout-btn" onclick="logout()">Logg ut</button>
+            </h2>
+            <div class="content-box scrollbar" id="pendingSignupsBox"></div>
+        </div>
+
+        <!-- All Users -->
+        <div class="panel">
+            <h2>👥 Alle Brukere</h2>
+            <div class="content-box scrollbar" id="allUsersBox"></div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="panel">
+            <h2>🏆 Leaderboard</h2>
+            <div class="content-box scrollbar" id="leaderboardBox"></div>
+        </div>
+
+        <!-- Chat Moderation -->
+        <div class="panel">
+            <h2>💬 Chat Moderering</h2>
+            <button class="btn-moderate" onclick="openChatModal()">Åpne Chat Moderering</button>
+        </div>
+
+        <!-- Survey Responses -->
+        <div class="panel">
+            <h2>📋 Elevundersøkelse</h2>
+            <div class="content-box scrollbar" id="surveyBox"></div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal" id="chatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💬 Chat Moderering</h3>
+                <button class="modal-close" onclick="closeChatModal()">×</button>
             </div>
-            <button id="refresh-chat">Refresh Chat</button>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 VhmBoards. All rights reserved.</p>
-    </footer>
-    <script src="admin.js"></script>
+            <div id="chatMessagesBox"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, signOut, ref, set, get, remove, onValue, query, orderByChild } from './firebase.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+
+        let currentUser = null;
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            if (!user || sessionStorage.getItem('userRole') !== 'admin') {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                initializeAdmin();
+            }
+        });
+
+        function initializeAdmin() {
+            loadPendingSignups();
+            loadAllUsers();
+            loadLeaderboard();
+            loadSurveyResponses();
+
+            // Real-time updates
+            const pendingRef = ref(db, 'pendingSignups');
+            onValue(pendingRef, () => loadPendingSignups());
+
+            const usersRef = ref(db, 'users');
+            onValue(usersRef, () => {
+                loadAllUsers();
+                loadLeaderboard();
+            });
+
+            const pointsRef = ref(db, 'points');
+            onValue(pointsRef, () => loadLeaderboard());
+
+            const surveyRef = ref(db, 'survey');
+            onValue(surveyRef, () => loadSurveyResponses());
+        }
+
+        function loadPendingSignups() {
+            const pendingRef = ref(db, 'pendingSignups');
+            get(pendingRef).then(snap => {
+                const box = document.getElementById('pendingSignupsBox');
+                box.innerHTML = '';
+
+                if (snap.exists()) {
+                    snap.forEach(childSnap => {
+                        const signup = childSnap.val();
+                        const signupId = childSnap.key;
+                        const entryEl = document.createElement('div');
+                        entryEl.className = 'entry';
+                        entryEl.innerHTML = `
+                            <div class="entry-info">
+                                <div class="entry-name">${signup.name}</div>
+                                <div class="entry-detail">📱 ${signup.phone}</div>
+                                <div class="entry-detail">📅 Født: ${signup.birthYear}</div>
+                            </div>
+                            <div class="entry-actions">
+                                <button class="btn-approve" onclick="approveSignup('${signupId}', '${signup.name}', '${signup.code}')">✓ Godkjenn</button>
+                                <button class="btn-decline" onclick="declineSignup('${signupId}')">✗ Avslå</button>
+                            </div>
+                        `;
+                        box.appendChild(entryEl);
+                    });
+                } else {
+                    box.innerHTML = '<div class="empty-state">Ingen ventende signups</div>';
+                }
+            });
+        }
+
+        function loadAllUsers() {
+            const usersRef = query(ref(db, 'users'), orderByChild('name'));
+            get(usersRef).then(snap => {
+                const box = document.getElementById('allUsersBox');
+                box.innerHTML = '';
+
+                if (snap.exists()) {
+                    snap.forEach(childSnap => {
+                        const user = childSnap.val();
+                        const uid = childSnap.key;
+                        const entryEl = document.createElement('div');
+                        entryEl.className = 'entry';
+                        entryEl.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                <div class="user-avatar">
+                                    ${user.avatar ? `<img src="${user.avatar}" alt="Avatar">` : '<span>👤</span>'}
+                                </div>
+                                <div class="entry-info">
+                                    <div class="entry-name">${user.name}</div>
+                                    <div class="entry-detail">${user.role === 'admin' ? '🔑 Admin' : '👤 Elev'}</div>
+                                </div>
+                            </div>
+                        `;
+                        box.appendChild(entryEl);
+                    });
+                } else {
+                    box.innerHTML = '<div class="empty-state">Ingen brukere</div>';
+                }
+            });
+        }
+
+        function loadLeaderboard() {
+            const pointsRef = query(ref(db, 'points'), orderByChild('points'));
+            get(pointsRef).then(snap => {
+                const box = document.getElementById('leaderboardBox');
+                box.innerHTML = '';
+
+                if (snap.exists()) {
+                    const entries = [];
+                    snap.forEach(childSnap => {
+                        entries.push({ uid: childSnap.key, points: childSnap.val() });
+                    });
+
+                    entries.reverse().slice(0, 10).forEach((entry, index) => {
+                        const usersRef = ref(db, `users/${entry.uid}`);
+                        get(usersRef).then(userSnap => {
+                            if (userSnap.exists()) {
+                                const user = userSnap.val();
+                                const entryEl = document.createElement('div');
+                                entryEl.className = 'entry';
+                                entryEl.innerHTML = `
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <strong style="color: #00ffff; min-width: 30px;">#${index + 1}</strong>
+                                        <div class="user-avatar">
+                                            ${user.avatar ? `<img src="${user.avatar}" alt="Avatar">` : '<span>👤</span>'}
+                                        </div>
+                                        <div class="entry-info">
+                                            <div class="entry-name">${user.name}</div>
+                                            <div class="entry-detail">${entry.points} poeng</div>
+                                        </div>
+                                    </div>
+                                `;
+                                box.appendChild(entryEl);
+                            }
+                        });
+                    });
+                } else {
+                    box.innerHTML = '<div class="empty-state">Ingen poeng ennå</div>';
+                }
+            });
+        }
+
+        function loadSurveyResponses() {
+            const surveyRef = ref(db, 'survey');
+            get(surveyRef).then(snap => {
+                const box = document.getElementById('surveyBox');
+                box.innerHTML = '';
+
+                if (snap.exists()) {
+                    snap.forEach(childSnap => {
+                        const uid = childSnap.key;
+                        const answers = childSnap.val();
+
+                        const usersRef = ref(db, `users/${uid}`);
+                        get(usersRef).then(userSnap => {
+                            if (userSnap.exists()) {
+                                const user = userSnap.val();
+                                const itemEl = document.createElement('div');
+                                itemEl.className = 'survey-item';
+                                itemEl.innerHTML = `
+                                    <div class="survey-name">👤 ${user.name}</div>
+                                    ${Object.keys(answers).map(key => `
+                                        <div class="survey-answer"><strong>${key}:</strong> ${answers[key]}</div>
+                                    `).join('')}
+                                `;
+                                box.appendChild(itemEl);
+                            }
+                        });
+                    });
+                } else {
+                    box.innerHTML = '<div class="empty-state">Ingen surveysvar ennå</div>';
+                }
+            });
+        }
+
+        window.approveSignup = function(signupId, name, code) {
+            const newUserRef = ref(db, `users/${currentUser.uid}${Date.now()}`);
+            set(newUserRef, {
+                name: name,
+                code: code,
+                role: 'student',
+                avatar: '',
+                joinedAt: new Date().getTime()
+            }).then(() => {
+                // Remove from pending
+                const pendingRef = ref(db, `pendingSignups/${signupId}`);
+                remove(pendingRef);
+                alert('✓ Elev godkjent!');
+            });
+        };
+
+        window.declineSignup = function(signupId) {
+            const pendingRef = ref(db, `pendingSignups/${signupId}`);
+            remove(pendingRef);
+            alert('✗ Søknad avslått');
+        };
+
+        window.openChatModal = function() {
+            loadChatMessages();
+            document.getElementById('chatModal').classList.add('active');
+        };
+
+        window.closeChatModal = function() {
+            document.getElementById('chatModal').classList.remove('active');
+        };
+
+        function loadChatMessages() {
+            const messagesRef = query(ref(db, 'messages'), orderByChild('timestamp'));
+            get(messagesRef).then(snap => {
+                const box = document.getElementById('chatMessagesBox');
+                box.innerHTML = '';
+
+                if (snap.exists()) {
+                    const messages = [];
+                    snap.forEach(childSnap => {
+                        messages.push({ id: childSnap.key, ...childSnap.val() });
+                    });
+
+                    messages.reverse().forEach(msg => {
+                        const itemEl = document.createElement('div');
+                        itemEl.className = 'message-item';
+                        itemEl.innerHTML = `
+                            <div>
+                                <div class="message-avatar">
+                                    ${msg.avatar ? `<img src="${msg.avatar}" alt="Avatar">` : '<span>👤</span>'}
+                                </div>
+                            </div>
+                            <div class="message-details">
+                                <div class="message-header">
+                                    <span class="message-name">${msg.name}</span>
+                                    <span class="message-time">${msg.time}</span>
+                                </div>
+                                <div class="message-text">${msg.text}</div>
+                            </div>
+                            <button class="delete-msg-btn" onclick="deleteMessage('${msg.id}')">Slett</button>
+                        `;
+                        box.appendChild(itemEl);
+                    });
+                } else {
+                    box.innerHTML = '<div class="empty-state">Ingen meldinger</div>';
+                }
+            });
+        }
+
+        window.deleteMessage = function(messageId) {
+            const messageRef = ref(db, `messages/${messageId}`);
+            remove(messageRef);
+            alert('✓ Melding slettet');
+            loadChatMessages();
+        };
+
+        window.logout = function() {
+            sessionStorage.clear();
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            });
+        };
+    </script>
 </body>
 </html>
